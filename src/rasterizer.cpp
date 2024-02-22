@@ -65,12 +65,46 @@ namespace CGL {
     }
   }
 
+
+  bool RasterizerImp::is_inside_edge(float x, float y, 
+    float x1, float y1,
+    float x2, float y2) {
+    float dx = x2 - x1;
+    float dy = y2 - y1;
+    return (x1 - x) * dy + (y - y1) * dx > 0;
+  }
+
   // Rasterize a triangle.
   void RasterizerImp::rasterize_triangle(float x0, float y0,
     float x1, float y1,
     float x2, float y2,
     Color color) {
     // TODO: Task 1: Implement basic triangle rasterization here, no supersampling
+    //bound
+    float min_x = std::min(std::min(x0, x1), x2);
+    float min_y = std::min(std::min(y0, y1), y2);
+    float max_x = std::max(std::max(x0, x1), x2);
+    float max_y = std::max(std::max(y0, y1), y2);
+    float pt[] = { min_x,min_y };
+
+    if ((x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0) < 0) {
+        swap(x1, x2);
+        swap(y1, y2);
+    }
+
+    for(pt[0]; pt[0] <= max_x; pt[0]++){
+      for(pt[1] = min_y; pt[1] <= max_y; pt[1]++){
+        if(is_inside_edge(pt[0], pt[1], x0, y0, x1, y1)
+          && is_inside_edge(pt[0], pt[1], x1, y1, x2, y2)
+          && is_inside_edge(pt[0], pt[1], x2, y2, x0, y0)){
+            rasterize_point(pt[0], pt[1], color);
+          }
+      }
+    }
+
+    rasterize_line(x0, y0, x1, y1, color);
+    rasterize_line(x1, y1, x2, y2, color);
+    rasterize_line(x0, y0, x2, y2, color);
 
     // TODO: Task 2: Update to implement super-sampled rasterization
 

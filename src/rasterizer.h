@@ -96,6 +96,11 @@ namespace CGL {
       float x1, float y1,
       Color color);
 
+    // Decide whether a point is inside a line
+    bool is_inside_edge(float x, float y, 
+      float x1, float y1,
+      float x2, float y2);
+
     // Rasterize a triangle
     // P0 = (x0, y0)
     // P1 = (x1, y1)
