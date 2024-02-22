@@ -38,35 +38,20 @@
 
 <h3 align="middle">Part 1: Rasterizing single-color triangles</h3>
 
-<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+<p></p>
 
+</p>I achieve the rasterization of a triangle by rasterizing its interior and edges separately. Initially, I arrange the given three points in counterclockwise order for ease of using the formula provided in the presentation slides, employing cross-product for this purpose. If the cross-product result is greater than zero, it indicates clockwise arrangement of the three points, requiring the exchange of two of them. Subsequently, I implement the is_inside_edge function according to the formula provided in the slides. If a point yields a function value d less than zero for all three edges, it lies inside the triangle, and I rasterize it using the rasterize_point function. I first determine the maximum and minimum x and y values among the three points, and then traverse the content within the rectangle to ensure only samples within the bounding box are evaluated.</p>
 <div align="middle">
   <table style="width=100%">
     <tr>
       <td>
-        <img src="images/image1.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-      <td>
-        <img src="images/image2.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
+        <img src="images/task1.png" align="middle" width="400px"/>
+        <figcaption align="middle">test6.svg</figcaption>
       </td>
     </tr>
     <br>
-    <tr>
-      <td>
-        <img src="images/image3.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-      <td>
-        <img src="images/image4.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-    </tr>
   </table>
 </div>
-
-
 <h3 align="middle">Part 2: Antialiasing triangles</h3>
 
 
