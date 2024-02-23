@@ -40,7 +40,7 @@
 
 <p></p>
 
-</p>I achieve the rasterization of a triangle by rasterizing its interior and edges separately. Initially, I arrange the given three points in counterclockwise order for ease of using the formula provided in the presentation slides, employing cross-product for this purpose. If the cross-product result is greater than zero, it indicates clockwise arrangement of the three points, requiring the exchange of two of them. Subsequently, I implement the is_inside_edge function according to the formula provided in the slides. If a point yields a function value d less than zero for all three edges, it lies inside the triangle, and I rasterize it using the rasterize_point function. I first determine the maximum and minimum x and y values among the three points, and then traverse the content within the rectangle to ensure only samples within the bounding box are evaluated.</p>
+<p>I achieve the rasterization of a triangle by rasterizing its interior and edges separately. Initially, I arrange the given three points in counterclockwise order for ease of using the formula provided in the presentation slides, employing cross-product for this purpose. If the cross-product result is greater than zero, it indicates clockwise arrangement of the three points, requiring the exchange of two of them. Subsequently, I implement the is_inside_edge function according to the formula provided in the slides. If a point yields a function value d less than zero for all three edges, it lies inside the triangle, and I rasterize it using the rasterize_point function. I first determine the maximum and minimum x and y values among the three points, and then traverse the content within the rectangle to ensure only samples within the bounding box are evaluated.</p>
 <div align="middle">
   <table style="width=100%">
     <tr>
@@ -179,8 +179,36 @@
 </table>
 
 <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
+<p>Pixel sampling is the process of mapping texture pixels to screen pixels. For the sampling points or supersampling points on the screen pixels, calculate their barycentric interpolation coefficients, and use the coefficients to multiply the texture pixels' ux, uy to obtain the corresponding texture pixel points. Using the relative texture pixel points multiplied by the width and height of the mipmap can yield the correct texture pixels.</p>
+<p>Nearest neighbor interpolation directly finds the closest pixel in the texture and uses its color. In contrast, bilinear interpolation uses the four pixels surrounding the pixel point and applies an interpolation method to weight their colors and obtain the final color.</p>
+<p>The difference between the two methods is quite noticeable in test5, as the image contains uniformly distributed lines. With bilinear interpolation, the image lines are significantly clearer when the sampling rate is 1, but the difference is not obvious when the sampling rate is 16.</p>
+<table style="width=100%">
+  <tr>
+    <td>
+      <img src="images/task5_1.png" align="middle" width="400px"/>
+      <figcaption align="middle">task5: test5 nearest rate=1</figcaption>
+    </td>
+    <td>
+      <img src="images/task5_2.png" align="middle" width="400px"/>
+      <figcaption align="middle">task5: test5 bilinear rate=1</figcaption>
+    </td>
+  </tr>
+  <br>
+</table>
 
-
+<table style="width=100%">
+  <tr>
+    <td>
+      <img src="images/task5_3.png" align="middle" width="400px"/>
+      <figcaption align="middle">task5: test5 nearest rate=16</figcaption>
+    </td>
+    <td>
+      <img src="images/task5_4.png" align="middle" width="400px"/>
+      <figcaption align="middle">task5: test5 bilinear rate=16</figcaption>
+    </td>
+  </tr>
+  <br>
+</table>
 <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
 
 
