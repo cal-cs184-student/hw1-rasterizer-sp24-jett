@@ -25,8 +25,8 @@
 
 <h1 align="middle">CS 184/284A: Computer Graphics and Imaging, Spring 2024</h1>
 <h1 align="middle">Homework 1: Rasterizer</h1>
-<h2 align="middle">YOUR NAME</h2>
-
+<h2 align="middle">Ruijie Jian</h2>
+<h2 align="middle">webpage(/docs/index.html):https://cal-cs184-student.github.io/hw1-rasterizer-sp24-jett/</h2>
 <br><br>
 
 <div>
@@ -151,7 +151,7 @@
   </table>
 </div>
 <h3 align="middle">Part 3: Transforms</h3>
-<p>I made Cubeman dance.</p>
+<p>I made Cubeman dancing.</p>
 <tr>
   <td>
     <img src="images/task3_dance.png" align="middle" width="400px"/>
@@ -210,8 +210,38 @@
   <br>
 </table>
 <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
+<p>Level sampling refers to the technique of dividing a texture image into a series of images with resolutions ranging from high to low, then calculating the appropriate level, and choosing sampling points from it (possibly using interpolation), ultimately increasing rendering speed and reducing image aliasing.</p>
+<p>Intuitively speaking, pixel sampling is faster because it does not require additional calculations such as interpolation, and it uses less memory since it only needs the original texture. However, its antialiasing capability is weaker because it only samples a single pixel.</p>
+<p>Level sampling is relatively more complex in computation, slower in speed, and requires multiple texture levels, leading to higher memory usage. However, it can provide better antialiasing effects.</p>
+<p>To add on, the more samples per pixel, the better the antialiasing effect, but the slower the sampling speed and the greater the memory usage, as the array used for storage will grow exponentially.</p>
 
+<table style="width=100%">
+  <tr>
+    <td>
+      <img src="images/lzpn.png" align="middle" width="400px"/>
+      <figcaption align="middle">lsm z; psm n</figcaption>
+    </td>
+    <td>
+      <img src="images/lzpl.png" align="middle" width="400px"/>
+      <figcaption align="middle">lsm z; psm l</figcaption>
+    </td>
+  </tr>
+  <br>
+</table>
 
+<table style="width=100%">
+  <tr>
+    <td>
+      <img src="images/lnpn.png" align="middle" width="400px"/>
+      <figcaption align="middle">lsm n; psm n</figcaption>
+    </td>
+    <td>
+      <img src="images/lnpl.png" align="middle" width="400px"/>
+      <figcaption align="middle">lsm n; psm l</figcaption>
+    </td>
+  </tr>
+  <br>
+</table>
 
 <h2 align="middle">Section III: Art Competition</h2>
 <p>If you are not participating in the optional art competition, don't worry about this section!</p>

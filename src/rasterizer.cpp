@@ -203,27 +203,63 @@ namespace CGL {
     int sx;
     int sy;
     float b_fac[3];
+    float b_fac_x[3];
+    float b_fac_y[3];
     int level = 0;
+
+    SampleParams sp;
+    sp.psm = psm;
+    sp.lsm = lsm;
     for(pt[0] = min_pt[0], sx = (int)(floor(pt[0]) * sqrt(sample_rate)); pt[0] <= max_pt[0]; pt[0]+=offset * 2, sx++){
       for(pt[1] = min_pt[1], sy = (int)(floor(pt[1]) * sqrt(sample_rate)); pt[1] <= max_pt[1]; pt[1]+=offset * 2, sy++){
+        Vector2D p_uv, p_dx_uv, p_dy_uv;
+        int dx = pt[0] + 1;
+        int dy = pt[1] + 1;
+        int dx_in = is_inside_edge(dx, pt[1], x0, y0, x1, y1)
+                    && is_inside_edge(dx, pt[1], x1, y1, x2, y2)
+          && is_inside_edge(dx, pt[1], x2, y2, x0, y0);
+        int dy_in = is_inside_edge(pt[0], dy, x0, y0, x1, y1)
+                    && is_inside_edge(pt[0], dy, x1, y1, x2, y2)
+                    && is_inside_edge(pt[0], dy, x2, y2, x0, y0);
+        if(dx_in){
+          b_fac_x[0] = ((x1 - dx) * (y2 - y1) + (pt[1] - y1) * (x2 - x1)) / ((x1 - x0) * (y2 - y1) + (y0 - y1) * (x2 - x1));
+          b_fac_x[1] = ((x2 - dx) * (y0 - y2) + (pt[1] - y2) * (x0 - x2)) / ((x2 - x1) * (y0 - y2) + (y1 - y2) * (x0 - x2));
+          b_fac_x[2] = 1 - b_fac[0] - b_fac[1];
+          p_dx_uv.x = b_fac[0] * u0 + b_fac[1] * u1 + b_fac[2] * u2;
+          p_dx_uv.y = b_fac[0] * v0 + b_fac[1] * v1 + b_fac[2] * v2;
+        }
+        if(dy_in){
+            b_fac_x[0] = ((x1 - pt[0]) * (y2 - y1) + (dy - y1) * (x2 - x1)) / ((x1 - x0) * (y2 - y1) + (y0 - y1) * (x2 - x1));
+            b_fac_x[1] = ((x2 - pt[0]) * (y0 - y2) + (dy - y2) * (x0 - x2)) / ((x2 - x1) * (y0 - y2) + (y1 - y2) * (x0 - x2));
+            b_fac_x[2] = 1 - b_fac[0] - b_fac[1];
+            p_dy_uv.x = b_fac[0] * u0 + b_fac[1] * u1 + b_fac[2] * u2;
+            p_dy_uv.y = b_fac[0] * v0 + b_fac[1] * v1 + b_fac[2] * v2;
+        }
         if(is_inside_edge(pt[0], pt[1], x0, y0, x1, y1)
           && is_inside_edge(pt[0], pt[1], x1, y1, x2, y2)
           && is_inside_edge(pt[0], pt[1], x2, y2, x0, y0)){
-            // rasterize_point(pt[0], pt[1], color);
-            // fill in the nearest pixel
-            if (sx < 0 || sx >= width * (int)(sqrt(sample_rate))) return;
-            if (sy < 0 || sy >= height * (int)(sqrt(sample_rate))) return;
-            b_fac[0] = ((x1 - pt[0]) * (y2 - y1) + (pt[1] - y1) * (x2 - x1)) / ((x1 - x0) * (y2 - y1) + (y0 - y1) * (x2 - x1));
-            b_fac[1] = ((x2 - pt[0]) * (y0 - y2) + (pt[1] - y2) * (x0 - x2)) / ((x2 - x1) * (y0 - y2) + (y1 - y2) * (x0 - x2));
-            b_fac[2] = 1 - b_fac[0] - b_fac[1];
-            Vector2D p_uv;
-            p_uv.x = b_fac[0] * u0 + b_fac[1] * u1 + b_fac[2] * u2;
-            p_uv.y = b_fac[0] * v0 + b_fac[1] * v1 + b_fac[2] * v2;
-            if(psm == P_NEAREST)
-              sample_buffer[sy * width * (int)(sqrt(sample_rate)) + sx] = tex.sample_nearest(p_uv, level);
-            else
-              sample_buffer[sy * width * (int)(sqrt(sample_rate)) + sx] = tex.sample_bilinear(p_uv, level);
-          }
+          // rasterize_point(pt[0], pt[1], color);
+          // fill in the nearest pixel
+          if (sx < 0 || sx >= width * (int)(sqrt(sample_rate))) return;
+          if (sy < 0 || sy >= height * (int)(sqrt(sample_rate))) return;
+          b_fac[0] = ((x1 - pt[0]) * (y2 - y1) + (pt[1] - y1) * (x2 - x1)) / ((x1 - x0) * (y2 - y1) + (y0 - y1) * (x2 - x1));
+          b_fac[1] = ((x2 - pt[0]) * (y0 - y2) + (pt[1] - y2) * (x0 - x2)) / ((x2 - x1) * (y0 - y2) + (y1 - y2) * (x0 - x2));
+          b_fac[2] = 1 - b_fac[0] - b_fac[1];
+
+          p_uv.x = b_fac[0] * u0 + b_fac[1] * u1 + b_fac[2] * u2;
+          p_uv.y = b_fac[0] * v0 + b_fac[1] * v1 + b_fac[2] * v2;
+          if(!dx_in) p_dx_uv = p_uv;
+          if(!dy_in) p_dy_uv = p_uv;
+          sp.p_uv = p_uv;
+          sp.p_dx_uv = p_dx_uv;
+          sp.p_dy_uv = p_dy_uv;
+          //task5
+          // if(psm == P_NEAREST)
+          //   sample_buffer[sy * width * (int)(sqrt(sample_rate)) + sx] = tex.sample_nearest(p_uv, level);
+          // else
+          //   sample_buffer[sy * width * (int)(sqrt(sample_rate)) + sx] = tex.sample_bilinear(p_uv, level);
+          sample_buffer[sy * width * (int)(sqrt(sample_rate)) + sx] = tex.sample(sp);
+        }
       }
     }
   }
