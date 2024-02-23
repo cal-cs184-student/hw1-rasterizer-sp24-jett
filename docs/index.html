@@ -46,16 +46,110 @@
     <tr>
       <td>
         <img src="images/task1.png" align="middle" width="400px"/>
-        <figcaption align="middle">test6.svg</figcaption>
+        <figcaption align="middle">task1:test6.svg</figcaption>
       </td>
     </tr>
     <br>
   </table>
 </div>
 <h3 align="middle">Part 2: Antialiasing triangles</h3>
+<p>My supersampling algorithm differs from the implementation in the lecture notes. Instead of altering and then restoring the sample buffer, it simply resizes according to the sampling rate, with the final output correctly obtained through a resolve step.</p>
+<p>First, triangles are processed by setting the step size to offset = 1.0 / (sqrt(sample_rate) * 2). Corresponding indices sx, sy are established for populating the sample buffer.</p>
+<pre>
+  // Rasterize a triangle.
+  void RasterizerImp::rasterize_triangle(float x0, float y0,
+    float x1, float y1,
+    float x2, float y2,
+    Color color) {
+    // TODO: Task 1: Implement basic triangle rasterization here, no supersampling
+    float pt[2];
+    //find bound
+    int min_x = floor(min(min(x0, x1), x2));
+    int min_y = floor(min(min(y0, y1), y2));
+    int max_x = floor(max(max(x0, x1), x2));
+    int max_y = floor(max(max(y0, y1), y2));
 
+    float offset = 1.0 / (sqrt(sample_rate) * 2);
+    float min_pt[] = { min_x + offset,min_y + offset };
+    float max_pt[] = { max_x + 1.0,max_y + 1.0 };
 
+    if((x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0) < 0){
+        swap(x1, x2);
+        swap(y1, y2);
+    }
 
+    int sx;
+    int sy;
+    for(pt[0] = min_pt[0], sx = (int)(floor(pt[0]) * sqrt(sample_rate)); pt[0] <= max_pt[0]; pt[0]+=offset * 2, sx++){
+      for(pt[1] = min_pt[1], sy = (int)(floor(pt[1]) * sqrt(sample_rate)); pt[1] <= max_pt[1]; pt[1]+=offset * 2, sy++){
+        if(is_inside_edge(pt[0], pt[1], x0, y0, x1, y1)
+          && is_inside_edge(pt[0], pt[1], x1, y1, x2, y2)
+          && is_inside_edge(pt[0], pt[1], x2, y2, x0, y0)){
+            // rasterize_point(pt[0], pt[1], color);
+            // fill in the nearest pixel
+            if (sx < 0 || sx >= width * (int)(sqrt(sample_rate))) return;
+            if (sy < 0 || sy >= height * (int)(sqrt(sample_rate))) return;
+            sample_buffer[sy * width * (int)(sqrt(sample_rate)) + sx] = color;
+          }
+      }
+    }
+  }
+</pre>
+<p>Then, the elements in the sample buffer are processed through two nested loops, averaging every sqrt(rate) * sqrt(rate) elements to obtain the color, which is then filled into a frame buffer cell. This</p>
+<pre>
+  void RasterizerImp::resolve_to_framebuffer() {
+    // TODO: Task 2: You will likely want to update this function for supersampling support
+
+    int super_width = width * (int)(sqrt(sample_rate));
+    int super_height = height * (int)(sqrt(sample_rate));
+    int len = sqrt(sample_rate);
+    int k;
+    int sx;
+    int sy;
+    for (int x = 0; x < width; ++x) {
+      for (int y = 0; y < height; ++y) {
+        //TODO: average color
+        sx = x * len;
+        sy = y * len;
+        Color col = Color::White;
+        if(sample_rate == 1) col = sample_buffer[y * width + x];
+        else{
+          for(int i = 0; i < len; ++i){
+            for(int j = 0; j < len; ++j){
+              if(i == 0 && j == 0) col = sample_buffer[sy * super_width + sx];
+              else col += sample_buffer[sy * super_width + sx + i * (super_width) + j];
+            }
+          }
+          for(k = 0; k < 3; ++k){
+            (&col.r)[k] = ((&col.r)[k]) / sample_rate;
+          }
+        }
+        for (k = 0; k < 3; ++k) {
+          this->rgb_framebuffer_target[3 * (y * width + x) + k] = (&col.r)[k] * 255;
+        }
+      }
+    }
+</pre>
+<p>By averaging with supersampling, pixel blocks that would not show color with single-pixel sampling may now display a faint color because part of them is selected by the supersampling, allowing for partial filling in the middle of the jagged edges. Below are images of triangle aliasing with sampling rates of 1, 4, and 16.</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/task2_1.png" align="middle" width="400px"/>
+        <figcaption align="middle">task2:rate 1</figcaption>
+      </td>
+      <td>
+        <img src="images/task2_2.png" align="middle" width="400px"/>
+        <figcaption align="middle">task2: rate 2</figcaption>
+      </td>
+      <td>
+        <img src="images/task2_4.png" align="middle" width="400px"/>
+        <figcaption align="middle">task2 rate 4</figcaption>
+      </td>
+    </tr>
+    <br>
+  </table>
+</div>
 <h3 align="middle">Part 3: Transforms</h3>
 
 
