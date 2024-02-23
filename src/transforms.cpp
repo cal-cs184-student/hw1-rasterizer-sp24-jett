@@ -15,22 +15,28 @@ Matrix3x3 translate(float dx, float dy) {
 	// Part 3: Fill this in.
 
 
-	return Matrix3x3();
+	return Matrix3x3(1, 0, dx,
+					 0, 1, dy,
+					 0, 0, 1);
 }
 
 Matrix3x3 scale(float sx, float sy) {
 	// Part 3: Fill this in.
 
 
-	return Matrix3x3();
+	return Matrix3x3(sx, 0, 0,
+                     0, sy, 0,
+                     0, 0, 1);
 }
 
 // The input argument is in degrees counterclockwise
 Matrix3x3 rotate(float deg) {
 	// Part 3: Fill this in.
+	float r = (deg/180) * 3.1415926535;
 
-
-	return Matrix3x3();
+	return Matrix3x3(cos(r), -sin(r), 0,
+                     sin(r), cos(r), 0,
+                     0 ,0, 1);
 }
 
 }
