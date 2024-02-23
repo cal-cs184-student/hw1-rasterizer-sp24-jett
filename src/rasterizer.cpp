@@ -114,11 +114,7 @@ namespace CGL {
           }
       }
     }
-
     // TODO: Task 2: Update to implement super-sampled rasterization
-
-
-
   }
 
 
@@ -128,9 +124,45 @@ namespace CGL {
   {
     // TODO: Task 4: Rasterize the triangle, calculating barycentric coordinates and using them to interpolate vertex colors across the triangle
     // Hint: You can reuse code from rasterize_triangle
+    float pt[2];
+    //find bound
+    int min_x = floor(min(min(x0, x1), x2));
+    int min_y = floor(min(min(y0, y1), y2));
+    int max_x = floor(max(max(x0, x1), x2));
+    int max_y = floor(max(max(y0, y1), y2));
 
+    float offset = 1.0 / (sqrt(sample_rate) * 2);
+    float min_pt[] = { min_x + offset,min_y + offset };
+    float max_pt[] = { max_x + 1.0,max_y + 1.0 };
 
+    if((x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0) < 0){
+        Color c_reg = c1;
+        c1 = c2;
+        c2 = c_reg;
+        swap(x1, x2);
+        swap(y1, y2);
+    }
 
+    int sx;
+    int sy;
+    float b_fac[3];
+
+    for(pt[0] = min_pt[0], sx = (int)(floor(pt[0]) * sqrt(sample_rate)); pt[0] <= max_pt[0]; pt[0]+=offset * 2, sx++){
+      for(pt[1] = min_pt[1], sy = (int)(floor(pt[1]) * sqrt(sample_rate)); pt[1] <= max_pt[1]; pt[1]+=offset * 2, sy++){
+        if(is_inside_edge(pt[0], pt[1], x0, y0, x1, y1)
+          && is_inside_edge(pt[0], pt[1], x1, y1, x2, y2)
+          && is_inside_edge(pt[0], pt[1], x2, y2, x0, y0)){
+            // rasterize_point(pt[0], pt[1], color);
+            // fill in the nearest pixel
+            if (sx < 0 || sx >= width * (int)(sqrt(sample_rate))) return;
+            if (sy < 0 || sy >= height * (int)(sqrt(sample_rate))) return;
+            b_fac[0] = ((x1 - pt[0]) * (y2 - y1) + (pt[1] - y1) * (x2 - x1)) / ((x1 - x0) * (y2 - y1) + (y0 - y1) * (x2 - x1));
+            b_fac[1] = ((x2 - pt[0]) * (y0 - y2) + (pt[1] - y2) * (x0 - x2)) / ((x2 - x1) * (y0 - y2) + (y1 - y2) * (x0 - x2));
+            b_fac[2] = 1 - b_fac[0] - b_fac[1];
+            sample_buffer[sy * width * (int)(sqrt(sample_rate)) + sx] = c0 * b_fac[0] + c1 * b_fac[1] + c2 * b_fac[2];
+          }
+      }
+    }
   }
 
 
